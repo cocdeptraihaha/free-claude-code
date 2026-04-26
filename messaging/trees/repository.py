@@ -167,6 +167,29 @@ class TreeRepository:
                         msg_ids.add(str(node.status_message_id))
         return msg_ids
 
+    def get_latest_tree_for_chat(self, platform: str, chat_id: str) -> MessageTree | None:
+        """Get the most recently updated tree for a given platform/chat.
+
+        Returns the tree with the most recently updated node for this chat.
+        Returns None if no trees exist for this chat.
+        """
+        latest_tree = None
+        latest_timestamp = None
+
+        for tree in self._trees.values():
+            for node in tree.all_nodes():
+                if str(node.incoming.platform) == str(platform) and str(
+                    node.incoming.chat_id
+                ) == str(chat_id):
+                    # Check if this node is more recent than our current latest
+                    node_timestamp = node.created_at
+                    if latest_timestamp is None or node_timestamp > latest_timestamp:
+                        latest_timestamp = node_timestamp
+                        latest_tree = tree
+                    break  # Found a node in this tree, no need to check other nodes
+
+        return latest_tree
+
     def to_dict(self) -> dict:
         """Serialize all trees."""
         return {

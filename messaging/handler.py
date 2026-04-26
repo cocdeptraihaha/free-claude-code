@@ -197,6 +197,25 @@ class ClaudeMessageHandler:
                         f"Reply to {incoming.reply_to_message_id} found tree but no valid parent node"
                     )
                     tree = None  # Treat as new conversation
+        else:
+            # Not a reply - try to find the latest tree for this chat
+            latest_tree = self.tree_queue.get_latest_tree_for_chat(
+                incoming.platform, incoming.chat_id
+            )
+            if latest_tree:
+                tree = latest_tree
+                # Find the most recent node in this tree to use as parent
+                # Get all nodes and find the one with the latest created_at timestamp
+                latest_node = None
+                for node in tree.all_nodes():
+                    if latest_node is None or node.created_at > latest_node.created_at:
+                        latest_node = node
+
+                if latest_node:
+                    parent_node_id = latest_node.node_id
+                    logger.info(
+                        f"Auto-linking to latest tree {tree.root_id}, parent node: {parent_node_id}"
+                    )
 
         # Generate node ID
         node_id = incoming.message_id

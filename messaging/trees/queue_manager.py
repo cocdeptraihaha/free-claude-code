@@ -417,6 +417,10 @@ class TreeQueueManager:
         """Get all message IDs for a given platform/chat."""
         return self._repository.get_message_ids_for_chat(platform, chat_id)
 
+    def get_latest_tree_for_chat(self, platform: str, chat_id: str) -> MessageTree | None:
+        """Get the most recently updated tree for a given platform/chat."""
+        return self._repository.get_latest_tree_for_chat(platform, chat_id)
+
     def to_dict(self) -> dict:
         """Serialize all trees."""
         return self._repository.to_dict()
